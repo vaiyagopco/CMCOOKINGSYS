@@ -271,6 +271,16 @@ a.btn.go{background:#000;color:#fff}
 .tag.g{background:#000;color:#fff}
 .actions{background:linear-gradient(transparent,#B2D235 28%)}
 #vHome .cx-who .tag{margin:0}
+.exrow{margin:2px 0 12px;padding:10px 10px 0;border:1.5px dashed #1a1a1a55;border-radius:10px}
+.exhead{display:flex;align-items:center;justify-content:space-between;margin:0 0 4px}
+.exn{font-size:13px;font-weight:700;color:var(--mut)}
+.exdel{width:34px;height:34px;padding:0;border-radius:50%}
+.exdel .ic{width:16px;height:16px}
+.exkept{flex:1;padding:12px 0 22px;font-weight:600}
+.exadd{width:100%;margin:0 0 4px}
+#exHint{font-size:12px;margin:4px 0 12px}
+.pn.pnx{font-size:12px;font-weight:500;color:var(--mut);margin:0 0 1px}
+.pn.pnx .dot{width:8px;height:8px}
 </style>
 </head>
 <body>
@@ -387,6 +397,9 @@ a.btn.go{background:#000;color:#fff}
     <label for="ppSub">ตัวรอง <i>*</i></label>
     <div class="selrow"><i class="dot" id="ppDot"></i><select id="ppSub" disabled></select></div>
     <p class="hint" id="ppOld"></p>
+    <div id="exBox"></div>
+    <button id="exAdd" type="button" class="ghost exadd"><svg class="ic"><use href="#i-plus"/></svg>เพิ่มตัวรอง (ไม่บังคับ)</button>
+    <p class="hint" id="exHint">ตัวรองเพิ่มเติมไม่นับในสถิติ สถิตินับเฉพาะตัวแรก</p>
     <p class="hint bad" id="ppMsg"></p>
   </div>
   <div class="fs">
@@ -701,7 +714,7 @@ function itemHtml(r){
   const kv = (k, v) => `<div><dt>${k}</dt><dd>${esc(v) || '-'}</dd></div>`;
   return `<div class="item" data-id="${esc(r.id)}" style="--pc:${pc}">
       <div class="head" data-a="tog">
-        <div class="hl"><div class="l1"><b>${esc(r.net)}</b></div>${r.pain ? `<span class="pn"><i class="dot"></i>${esc(r.pain)}</span>` : ''}<span class="dt">${esc(d1)}</span></div>
+        <div class="hl"><div class="l1"><b>${esc(r.net)}</b></div>${r.pain ? `<span class="pn"><i class="dot"></i>${esc(r.pain)}</span>` : ''}${(r.extra || []).map(x => `<span class="pn pnx"><i class="dot" style="background:${ppColor(x.id)}"></i>${esc(x.t)}</span>`).join('')}<span class="dt">${esc(d1)}</span></div>
         <button type="button" class="chev" data-a="tog" aria-expanded="false" aria-label="รายละเอียด">${ic('chev')}</button>
       </div>
       <div class="detail">
@@ -747,6 +760,7 @@ function lock(on){
   $('ppMain').disabled = on; $('ppSub').disabled = on || !$('ppMain').value;
   $('lineAdd').disabled = on; $('lineDel').disabled = on; $('chgNet').disabled = on;
   $('save').disabled = on; $('gps').disabled = on;
+  $('exAdd').disabled = on; $('exBox').querySelectorAll('select,button').forEach(el => el.disabled = on);
 }
 
 /* Pain Point: หมวกหลัก → ตัวรอง */
@@ -778,9 +792,70 @@ function setPain(r){
 function refreshPP(){          // โหลดรายการเสร็จทีหลัง: ใส่ตัวเลือกใหม่ แต่คงที่เลือกไว้เดิม
   const m = $('ppMain').value, s = $('ppSub').value;
   fillMain(); $('ppMain').value = m; fillSub($('ppMain').value); $('ppSub').value = s; updPain();
+  exRows().forEach(row => { if (row.dataset.kept) return; const em = row.querySelector('.exMain').value, es = row.querySelector('.exSub').value; exFillMain(row); row.querySelector('.exMain').value = em; exFillSub(row, em); row.querySelector('.exSub').value = es; exDot(row); });
 }
 $('ppMain').onchange = () => { fillSub($('ppMain').value); updPain(); };
 $('ppSub').onchange = updPain;
+
+/* ตัวรองเพิ่มเติม: ไม่บังคับ สูงสุด 4 แถว แต่ละแถวเลือกหมวกหลัก/ตัวรองเองได้ (ค่าเริ่มต้น = หมวกหลักของตัวแรก) */
+const EX_MAX = 4;
+const exRows = () => [...$('exBox').querySelectorAll('.exrow')];
+function exFillMain(row){
+  const sel = row.querySelector('.exMain'), seen = [];
+  sel.length = 0; sel.add(new Option('— เลือกหมวกหลัก —', ''));
+  PP.forEach(p => { if (seen.indexOf(p.main) < 0) { seen.push(p.main); sel.add(new Option(p.main, p.main)); } });
+}
+function exFillSub(row, main){
+  const sel = row.querySelector('.exSub');
+  sel.length = 0; sel.add(new Option(main ? '— เลือกตัวรอง —' : 'เลือกหมวกหลักก่อน', ''));
+  if (main) PP.filter(p => p.main === main).forEach(p => sel.add(new Option(p.sub, p.id)));
+  sel.disabled = !main;
+}
+function exDot(row){ const id = row.querySelector('.exSub') ? row.querySelector('.exSub').value : row.dataset.kept; row.querySelector('.dot').style.background = id ? ppColor(id) : GRAY; }
+function exNumber(){
+  exRows().forEach((row, i) => { row.querySelector('.exn').textContent = 'ตัวรองที่ ' + (i + 2); });
+  $('exAdd').classList.toggle('hide', exRows().length >= EX_MAX);
+}
+function addExtra(x){
+  const row = document.createElement('div'); row.className = 'exrow';
+  const known = x && x.id && PPMAP[x.id];
+  if (x && x.id && !known) {                     // ตัวเลือกที่ถูกปิดแล้ว: คงไว้ตามที่บันทึก ลบได้แต่เลือกใหม่ไม่ได้
+    row.dataset.kept = x.id;
+    row.innerHTML = `<div class="exhead"><span class="exn"></span><button type="button" class="exdel ghost" aria-label="ลบตัวรองนี้">${ic('x')}</button></div>
+      <div class="selrow"><i class="dot"></i><span class="exkept">${esc(x.t || x.id)} (ปิดใช้งานแล้ว)</span></div>`;
+  } else {
+    row.innerHTML = `<div class="exhead"><span class="exn"></span><button type="button" class="exdel ghost" aria-label="ลบตัวรองนี้">${ic('x')}</button></div>
+      <select class="exMain" aria-label="หมวกหลัก (ตัวรองเพิ่มเติม)"></select>
+      <div class="selrow"><i class="dot"></i><select class="exSub" aria-label="ตัวรองเพิ่มเติม"></select></div>`;
+    exFillMain(row);
+    const main = known ? PPMAP[x.id].main : $('ppMain').value;
+    row.querySelector('.exMain').value = main; exFillSub(row, row.querySelector('.exMain').value);
+    if (known) row.querySelector('.exSub').value = x.id;
+    row.querySelector('.exMain').onchange = () => { exFillSub(row, row.querySelector('.exMain').value); exDot(row); };
+    row.querySelector('.exSub').onchange = () => {
+      const v = row.querySelector('.exSub').value;
+      const dup = v && (v === $('ppSub').value || exRows().some(o => o !== row && (o.dataset.kept === v || (o.querySelector('.exSub') && o.querySelector('.exSub').value === v))));
+      if (dup) { row.querySelector('.exSub').value = ''; say('เลือกตัวรองซ้ำกับที่เลือกไว้แล้ว'); } else say();
+      exDot(row);
+    };
+  }
+  row.querySelector('.exdel').onclick = () => { row.remove(); exNumber(); };
+  $('exBox').appendChild(row); exDot(row); exNumber();
+  return row;
+}
+function setExtra(list){ $('exBox').innerHTML = ''; (list || []).forEach(x => addExtra(x)); exNumber(); }
+$('exAdd').onclick = () => { if (exRows().length >= EX_MAX) return; const row = addExtra(null); (row.querySelector('.exSub:not(:disabled)') || row.querySelector('.exMain')).focus(); };
+/* คืนค่า id ของตัวรองเพิ่มเติม หรือ null ถ้ามีแถวที่เลือกไม่ครบ */
+function collectExtra(){
+  const ids = [];
+  for (const row of exRows()) {
+    if (row.dataset.kept) { ids.push(row.dataset.kept); continue; }
+    const v = row.querySelector('.exSub').value;
+    if (v) { if (!ids.includes(v)) ids.push(v); }
+    else if (row.querySelector('.exMain').value) return null;        // เลือกหมวกแล้วแต่ยังไม่เลือกตัวรอง
+  }
+  return ids;
+}
 
 /* Line Type: ปุ่มเพิ่ม → แสดงช่อง Drum No. (เก็บรูปแบบเดิม) */
 function setLine(on){ $('lineBox').classList.toggle('hide', !on); $('lineAdd').classList.toggle('hide', on); }
@@ -792,6 +867,7 @@ function fill(r){
   F.forEach(k => $(k).value = r[k] ?? '');
   keepSn = r.sn || '';
   setPain(r); setLine(!!r.drum); sync('drumChips', 'drum');
+  setExtra(r.extra || []);
 }
 
 /* mode: 'new' (มาจากขั้นที่ 1) | 'again' (คัดลอกลูกค้าจากรายการเดิม) | 'edit' (แก้ไขรายการเดิม) */
@@ -909,6 +985,10 @@ $('save').onclick = () => busy($('save'), 'กำลังบันทึก…'
   if (sub) rec.painId = sub;                       // เลือกจากรายการ: เซิร์ฟเวอร์ตรวจและสร้างข้อความ Pain Point เอง
   else if (legacy) rec.pain = legacy;              // รายการเก่า (ข้อความอิสระ / ตัวเลือกที่ถูกปิดแล้ว) แก้ช่องอื่นได้โดยคงค่าเดิม
   else return say('เลือก Pain Point (หมวกหลักและตัวรอง) ก่อนบันทึก');
+  const ex = collectExtra();
+  if (ex === null) return say('เลือกตัวรองให้ครบทุกแถว หรือกดลบแถวที่ไม่ใช้');
+  if (sub && ex.includes(sub)) return say('ตัวรองเพิ่มเติมซ้ำกับตัวแรก');
+  rec.extra = ex;
   const j = await api('save', {rec});
   if (!j.ok) return say(j.error);
   upsert(j.item); formSeq++; view('vList'); draw(); window.scrollTo(0, 0);
