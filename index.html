@@ -501,7 +501,7 @@ function view(v){
 function say(t){ $('msg').textContent = t || ''; $('lgMsg').textContent = t || ''; }
 function goHome(){
   formSeq++; say(); closeBig();
-  $('whoName').textContent = me ? me.name : ''; $('whoRole').textContent = me ? (me.role === 'admin' ? 'ผู้ดูแล' : 'ช่าง') : '';
+  $('whoName').textContent = me ? (me.team || me.name) : ''; $('whoRole').textContent = me ? (me.role === 'admin' ? 'ผู้ดูแล' : 'ช่าง') + ' · ' + me.name : '';
   $('toolAdm').classList.toggle('hide', !(me && me.role === 'admin'));
   view('vHome');
 }
@@ -695,8 +695,8 @@ function shown(){
 const ic = (n, c) => `<svg class="ic${c ? ' ' + c : ''}" aria-hidden="true"><use href="#i-${n}"/></svg>`;
 function itemHtml(r){
   const m = mapLink(r.pin), d0 = fd(r.at), pc = ppColor(r.pid);
-  const d1 = r.upAt ? 'แก้ไข: ' + ts(r.upAt, d0) + ' · ' + (r.upBy || '-')
-    : 'บันทึก: ' + String(r.at || '').slice(11, 16) + ' · ' + (r.by || '-');
+  const d1 = r.upAt ? 'แก้ไข: ' + ts(r.upAt, d0) + ' · ' + (r.upTeam || r.upBy || '-')
+    : 'บันทึก: ' + String(r.at || '').slice(11, 16) + ' · ' + (r.team || r.by || '-');
   const canDel = !!me && me.role === 'admin';
   const kv = (k, v) => `<div><dt>${k}</dt><dd>${esc(v) || '-'}</dd></div>`;
   return `<div class="item" data-id="${esc(r.id)}" style="--pc:${pc}">
@@ -841,7 +841,7 @@ $('items').onclick = async e => {
     return;
   }
   if (b.dataset.a === 'del') {
-    const ok = await ask('ลบรายการ ' + r.net + '\nบันทึก ' + String(r.at || '') + ' โดย ' + (r.by || '-') + '\n\nลบแล้วกู้คืนไม่ได้ แน่ใจหรือไม่?');
+    const ok = await ask('ลบรายการ ' + r.net + '\nบันทึก ' + String(r.at || '') + ' โดย ' + (r.team ? r.team + ' (' + r.by + ')' : (r.by || '-')) + '\n\nลบแล้วกู้คืนไม่ได้ แน่ใจหรือไม่?');
     if (!ok) return;
     busy(b, 'กำลังลบ…', async () => {
       const j = await api('remove', {id});

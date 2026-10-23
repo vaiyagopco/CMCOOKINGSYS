@@ -217,7 +217,7 @@ function draw(j){
   if (old) h += `<div class="card"><h2>ข้อมูลเก่า (ยังไม่ผูกหมวก) · ${old}</h2>${j.legacy.map(l => `<div class="tr"><span>${esc(l.text)}</span><b>${l.n}</b></div>`).join('')}</div>`;
   h += `<div class="card"><h2>รายวัน</h2><div class="days" role="img" aria-label="จำนวนรายการรายวัน">${j.days.slice(0, nd).map((n, i) => `<div title="วันที่ ${i + 1}: ${n}" style="height:${n * 100 / mx}%"></div>`).join('')}</div>
     <div class="dl"><span>1</span><span>${nd}</span></div></div>`;
-  h += '<div class="card"><h2>ตามช่าง</h2>' + j.tech.map(t => `<div class="tr"><span>${esc(t.name)}</span><b>${t.n}</b></div>`).join('') + '</div>';
+  h += '<div class="card"><h2>ตามทีม (Name ตอนบันทึก)</h2>' + j.tech.map(t => `<div class="tr"><span>${esc(t.name)}</span><b>${t.n}</b></div>`).join('') + '</div>';
   $('out2').innerHTML = h;
 }
 load(''); pendingBadge();

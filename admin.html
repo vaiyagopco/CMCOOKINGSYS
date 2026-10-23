@@ -176,7 +176,7 @@ async function busy(b, txt, fn){
 }
 function pendingBadge(){ api('req_list').then(j => { if (j.ok) badge(j.items.length); }); }
 
-$('cap').textContent = 'เข้าสู่ระบบเป็น ' + me.name;
+$('cap').textContent = 'เข้าสู่ระบบเป็น ' + (me.team ? me.team + ' · ' : '') + me.name;
 api('req_list').then(j => {
   if (!j.ok) return say(j.error);
   const n = j.items.length;
