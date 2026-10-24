@@ -313,6 +313,10 @@ main > section.cx-in-b{animation:cxInB .2s ease-out}
 .kid{display:flex;justify-content:space-between;gap:8px;padding:10px 0;border-top:1px solid var(--line);cursor:pointer}
 .kid span{color:var(--mut);font-size:13px;text-align:right}
 .pinpos{font:600 14px ui-monospace,Menlo,Consolas,monospace;margin:4px 0 8px}
+.hint.sp-fmt{margin:4px 0 6px;font-size:13px;overflow-wrap:anywhere}
+.hint.sp-fmt:empty{min-height:0;margin:0}
+.sp-old{border-left:3px solid #1a1a1a;padding-left:10px;margin:0 0 10px}
+#spOldAdd{margin:0 0 12px}
 </style>
 </head>
 <body>
@@ -494,10 +498,17 @@ main > section.cx-in-b{animation:cxInB .2s ease-out}
   </div>
   <div class="fs">
     <h3><svg class="ic"><use href="#i-tree"/></svg>SP &amp; Detail</h3>
-    <label for="sp">SP Code (Splitter Alias)</label><input id="sp" maxlength="60" autocomplete="off">
+    <label for="sp">SP Code (Splitter Alias)</label><input id="sp" maxlength="60" autocomplete="off" spellcheck="false" autocapitalize="characters" placeholder="2805_155_00/01_SP011_3291608/3">
+    <p class="hint sp-fmt" id="spFmt"></p>
     <p class="hint" id="spCheck"></p>
     <button id="spNearBtn" type="button" class="ghost" style="width:100%;margin:-4px 0 8px"><svg class="ic"><use href="#i-gps"/></svg>SP ใกล้บ้านลูกค้า</button>
     <div class="chips" id="spChips"></div>
+    <button id="spOldAdd" type="button" class="ghost big"><svg class="ic"><use href="#i-plus"/></svg>เปลี่ยน SP (เก็บ SP เดิม)</button>
+    <div id="spOldBox" class="hide sp-old">
+      <label for="spOld">SP เดิม (ก่อนย้าย SP/พอร์ต)</label><input id="spOld" maxlength="60" autocomplete="off" spellcheck="false" autocapitalize="characters" placeholder="SP ก่อนเปลี่ยน">
+      <p class="hint sp-fmt" id="spOldFmt"></p>
+      <button id="spOldDel" type="button" class="del"><svg class="ic"><use href="#i-trash"/></svg>ลบ SP เดิม</button>
+    </div>
     <label for="note">Detail (หมายเหตุ)</label>
     <textarea id="note" rows="6" maxlength="2000"></textarea>
   </div>
@@ -632,7 +643,7 @@ let formSnap0 = '';
 function formSnap(){
   return JSON.stringify([F.map(k => $(k).value), $('ppSub').value,
     exRows().map(r => r.dataset.kept || (r.querySelector('.exSub') || {}).value || ''),
-    $('snBox').classList.contains('hide'), $('sn').value, $('snOld').value, $('lineBox').classList.contains('hide')]);
+    $('snBox').classList.contains('hide'), $('sn').value, $('snOld').value, $('lineBox').classList.contains('hide'), $('spOld').value, $('spOldBox').classList.contains('hide')]);
 }
 function formClean(){ formSnap0 = formSnap(); }
 function formDirty(){ return curView === 'vForm' && formSnap() !== formSnap0; }
@@ -860,7 +871,7 @@ function itemHtml(r){
         <button type="button" class="chev" data-a="tog" aria-expanded="false" aria-label="รายละเอียด">${ic('chev')}</button>
       </div>
       <div class="detail">
-        <dl class="kv">${kv('SP', r.sp)}${r.sn ? `<div><dt>SN ใหม่</dt><dd><button type="button" class="snbtn" data-a="sn">${esc(r.sn)} ›</button></dd></div>` : ''}${r.snOld ? kv('SN เก่า', r.snOld) : ''}</dl>
+        <dl class="kv">${r.spOld ? kv('SP ใหม่', r.sp) + kv('SP เดิม', r.spOld) : kv('SP', r.sp)}${r.sn ? `<div><dt>SN ใหม่</dt><dd><button type="button" class="snbtn" data-a="sn">${esc(r.sn)} ›</button></dd></div>` : ''}${r.snOld ? kv('SN เก่า', r.snOld) : ''}</dl>
         ${r.note ? `<div class="dtl"><small>Detail</small><p>${esc(r.note)}</p></div>` : ''}
         ${m ? `<a class="btn go" target="_blank" rel="noopener noreferrer" href="${m}">${ic('nav')}นำทาง</a>` : ''}
         <div class="row">
@@ -903,7 +914,7 @@ function lock(on){
   $('ppMain').disabled = on; $('ppSub').disabled = on || !$('ppMain').value;
   $('lineAdd').disabled = on; $('lineDel').disabled = on; $('chgNet').disabled = on;
   $('save').disabled = on; $('gps').disabled = on;
-  $('exAdd').disabled = on; ['sn','snOld','snAdd','snDel'].forEach(k => $(k).disabled = on); $('exBox').querySelectorAll('select,button').forEach(el => el.disabled = on);
+  $('exAdd').disabled = on; ['sn','snOld','snAdd','snDel','spOld','spOldAdd','spOldDel'].forEach(k => $(k).disabled = on); $('exBox').querySelectorAll('select,button').forEach(el => el.disabled = on);
 }
 
 /* Pain Point: หมวกหลัก → ตัวรอง */
@@ -1206,7 +1217,8 @@ function fill(r){
   F.forEach(k => $(k).value = r[k] ?? '');
   keepSn = r.sn || ''; $('snOld').value = r.snOld || ''; setSn(!!(r.sn || r.snOld)); fillSnSel(keepSn);
   setPain(r); setLine(!!r.drum); sync('drumChips', 'drum');
-  setExtra(r.extra || []);
+  setExtra(r.extra || []); spFmtShow();
+  spBase = r.sp || ''; spOldNo = false; $('spOld').value = r.spOld || ''; setSpOld(!!r.spOld); spFmtShow('spOld', 'spOldFmt');
   formClean();
 }
 
@@ -1324,12 +1336,64 @@ function upsert(item){
   });
 }
 
+/* SP Code มาตรฐาน: [HF/FF]2805_155_00/01_SP011 (SP Alias) _3291608 (SP Code) /3 (พอร์ต) · RET คงรูปเดิม พอร์ตใช้ / */
+function spNorm(v){
+  const s = String(v == null ? '' : v).trim().replace(/\s+/g, ' ');
+  if (!s) return {v: '', k: ''};
+  let m = s.match(/^(?:(HF|FF)\s*[-_]?\s*)?(\d{4})[\s_-]+(\d{1,3})[\s_]+(\d{2})\s*\/\s*(\d{2})[\s_]+SP\s*(\d{1,3})(?:[\s_]+(\d{6,8})\s*(?:[:\/]\s*(\d*))?)?$/i);
+  if (m) {
+    const alias = (m[1] ? m[1].toUpperCase() : '') + m[2] + '_' + m[3].padStart(3, '0') + '_' + m[4] + '/' + m[5] + '_SP' + m[6].padStart(3, '0');
+    return {v: alias + (m[7] ? '_' + m[7] + (m[8] ? '/' + m[8] : '') : ''), k: m[7] ? (m[7].length === 7 ? 'std' : 'len') : 'alias'};
+  }
+  m = s.match(/^RET\s*(\d+)\s*-\s*(\d+)\s*(?:[:\/]\s*(\d*))?$/i);
+  if (m) return {v: 'RET' + m[1] + '-' + m[2] + (m[3] ? '/' + m[3] : ''), k: 'ret'};
+  return {v: s, k: 'other'};
+}
+function spFmtShow(i, h){
+  i = i || 'sp'; h = h || 'spFmt';
+  const raw = $(i).value, r = spNorm(raw), el = $(h);
+  el.className = 'hint sp-fmt'; el.textContent = '';
+  if (!r.k) return;
+  const same = r.v === raw.trim();
+  if (r.k === 'std' || r.k === 'ret') el.textContent = same ? '✓ รูปแบบมาตรฐาน' : 'จะบันทึกเป็น: ' + r.v;
+  else {
+    el.className = 'hint sp-fmt bad';
+    el.textContent = r.k === 'alias' ? '⚠ ยังไม่มี SP Code (เลข 7 หลัก) ต่อท้าย · จะบันทึกเป็น: ' + r.v
+      : r.k === 'len' ? '⚠ SP Code ปกติมี 7 หลัก ตรวจอีกครั้ง · จะบันทึกเป็น: ' + r.v
+      : '⚠ ไม่ใช่รูปแบบมาตรฐาน (บันทึกได้) เช่น 2805_155_00/01_SP011_3291608/3';
+  }
+}
+$('sp').addEventListener('input', () => spFmtShow());
+$('sp').addEventListener('blur', () => { const r = spNorm($('sp').value); if (r.k && r.k !== 'other' && r.v !== $('sp').value) { $('sp').value = r.v; spFmtShow(); } });
+
+/* SP เดิม: เก็บ SP ก่อนย้าย · เปลี่ยน SP จากค่าตอนเปิดฟอร์ม (แก้ไข/รายการใหม่) → ใส่ SP เดิมให้อัตโนมัติ แก้หรือลบได้ */
+let spBase = '', spOldNo = false;
+const spKey = v => spNorm(v).v.toUpperCase();
+function setSpOld(on){
+  $('spOldBox').classList.toggle('hide', !on); $('spOldAdd').classList.toggle('hide', on);
+  document.querySelector('label[for=sp]').textContent = on ? 'SP Code ใหม่ (หลังย้าย)' : 'SP Code (Splitter Alias)';
+}
+function spOldAuto(){
+  if (!spBase) return;
+  const a = spKey($('sp').value), b = spKey(spBase), o = spKey($('spOld').value);
+  if (a && a !== b && !o && !spOldNo) { $('spOld').value = spNorm(spBase).v; setSpOld(true); spFmtShow('spOld', 'spOldFmt'); }
+  else if (a === b && o === b) { $('spOld').value = ''; setSpOld(false); spFmtShow('spOld', 'spOldFmt'); }
+}
+$('sp').addEventListener('blur', spOldAuto);
+$('sp').addEventListener('change', spOldAuto);
+$('spOldAdd').onclick = () => { spOldNo = false; setSpOld(true); $('spOld').focus(); };
+$('spOldDel').onclick = () => { $('spOld').value = ''; spFmtShow('spOld', 'spOldFmt'); setSpOld(false); spOldNo = true; };
+$('spOld').addEventListener('input', () => spFmtShow('spOld', 'spOldFmt'));
+$('spOld').addEventListener('blur', () => { const r = spNorm($('spOld').value); if (r.k && r.k !== 'other' && r.v !== $('spOld').value) { $('spOld').value = r.v; spFmtShow('spOld', 'spOldFmt'); } });
 $('save').onclick = () => busy($('save'), 'กำลังบันทึก…', async () => {
-  say();
+  say(); spOldAuto();
   const snOn = !$('snBox').classList.contains('hide');
   const rec = {id: $('id').value, sn: snOn ? $('sn').value : '', snOld: snOn ? $('snOld').value.trim() : ''};
   if (snOn && !rec.sn && !rec.snOld) return say('เลือก SN เครื่องใหม่ หรือกรอก SN เครื่องเก่า หรือกด ลบข้อมูล SN'); F.forEach(k => rec[k] = $(k).value.trim());
   if (!(rec.id ? /^(888|880)\d+$/ : /^(888|880)\d{7}$/).test(rec.net)) return say('Internet No. ต้องเป็นตัวเลข 10 หลัก ขึ้นต้นด้วย 888 หรือ 880');
+  rec.spOld = $('spOldBox').classList.contains('hide') ? '' : $('spOld').value.trim();
+  if (rec.spOld && !rec.sp) return say('กรอก SP ใหม่ด้วย เมื่อมี SP เดิม');
+  if (rec.spOld && spKey(rec.spOld) === spKey(rec.sp)) return say('SP เดิมกับ SP ใหม่เหมือนกัน ถ้าไม่ได้ย้าย SP ให้กด ลบ SP เดิม');
   const sub = $('ppSub').value;
   if (sub) rec.painId = sub;                       // เลือกจากรายการ: เซิร์ฟเวอร์ตรวจและสร้างข้อความ Pain Point เอง
   else if (legacy) rec.pain = legacy;              // รายการเก่า (ข้อความอิสระ / ตัวเลือกที่ถูกปิดแล้ว) แก้ช่องอื่นได้โดยคงค่าเดิม
