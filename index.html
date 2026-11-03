@@ -3,10 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src https://cmcs.cmcooking.workers.dev; img-src https://tile.openstreetmap.org https://server.arcgisonline.com; base-uri 'none'; form-action 'none'">
-<meta name="theme-color" content="#1b2620">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'unsafe-inline'; connect-src https://cmcs.cmcooking.workers.dev; img-src 'self' data: https://tile.openstreetmap.org https://server.arcgisonline.com; base-uri 'none'; form-action 'none'">
+<meta name="theme-color" content="#B2D235">
 <meta name="referrer" content="no-referrer">
 <title>CMCOOKINGLIST</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg"><link rel="icon" type="image/png" sizes="192x192" href="icon-192.png"><link rel="apple-touch-icon" href="apple-touch-icon.png">
 <style>
 /* ===== สีหลัก แก้ที่นี่ที่เดียว ===== */
 :root{
@@ -16,7 +17,7 @@
   --on-g:#17210d; --on-o:#2a1400;
   --dark:#1b2620;   /* หัวเว็บ */
   --bg:#f2f5ee; --card:#fff; --ink:#18221d; --mut:#5d6b61; --line:#dce4d2; --soft:#eef3e4;
-  --err:#b3261e; --r:14px;
+  --err:#9b0018; --r:14px;
 }
 @media(prefers-color-scheme:dark){:root{
   --gd:#B2D235; --dark:#0c120e; --bg:#0f1511; --card:#18211b; --ink:#e8efe6; --mut:#9aab9e; --line:#2a372d; --soft:#1f2b22; --err:#ff8a80;
@@ -609,6 +610,34 @@ header.cx .cx-gear.cx-roleic{width:28px;height:28px;color:#1a1a1a}
   #vRep .rp-card,#vRep .rp-t{border:1px solid #ccc;break-inside:avoid}
   *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
 }
+
+/* โลโก้หลัก A1 */
+header.cx .cx-gear.cx-logo{width:28px;height:28px;flex:none}
+.cx-subrow{display:flex;align-items:center;gap:5px}
+.cx-tb{background:#E53935;color:#fff;font-size:9px;font-weight:900;letter-spacing:1px;padding:1px 5px;border-radius:4px;line-height:1.35}
+/* ข้อความรองที่วางบนพื้นมะนาว: ใช้สี hint (คมกว่า) */
+.hint,.empty,label,.lbar span,.who,.cx-who,header small,.tool small,.exn,.bt-grp,.dh{color:#3d4433}
+
+#vLogin .lg-logo{position:relative}
+#vLogin .lg-logo svg{width:46px;height:46px}
+#vLogin .lg-gear{width:24px;height:24px}
+#vLogin .lg-tb{position:absolute;top:-9px;right:-16px;background:#E53935;color:#fff;font-style:normal;font-size:10px;font-weight:900;letter-spacing:1px;padding:3px 6px;border-radius:6px;transform:rotate(8deg);box-shadow:0 2px 4px rgba(0,0,0,.25)}
+
+/* สแกน QR / Barcode */
+#vBar button.scan-btn{width:100%;min-height:52px;margin:0 0 12px;font-size:16px;background:#000;color:#fff;border-radius:12px;gap:10px}
+#vBar button.scan-btn svg{width:24px;height:24px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+#btFind{width:100%;min-height:42px;margin:0 0 12px;font-size:14px}
+#scanOv{position:fixed;inset:0;z-index:90;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center}
+#scanOv.hide{display:none}
+#scanV{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+#scanOv .scan-frame{position:relative;width:min(78vw,340px);height:min(52vw,230px);border-radius:16px;box-shadow:0 0 0 100vmax rgba(0,0,0,.45);outline:3px solid #B2D235}
+#scanOv .scan-frame i{position:absolute;left:8%;right:8%;top:50%;height:2px;background:#F58220;box-shadow:0 0 8px #F58220;animation:scanLine 1.6s ease-in-out infinite alternate}
+@keyframes scanLine{from{top:12%}to{top:88%}}
+@media (prefers-reduced-motion:reduce){#scanOv .scan-frame i{animation:none}}
+#scanMsg{position:relative;color:#fff;font-weight:700;font-size:15px;margin:22px 16px 0;text-align:center;text-shadow:0 1px 3px #000}
+#scanOv .scan-btns{position:absolute;left:0;right:0;bottom:calc(24px + env(safe-area-inset-bottom));display:flex;justify-content:center;gap:12px}
+#scanOv .scan-btns button{min-width:110px;min-height:46px;font-size:15px;background:#fff;color:#1a1a1a;border-radius:12px}
+#scanOv .scan-btns button.on{background:#F5B700}
 </style>
 </head>
 <body>
@@ -638,15 +667,15 @@ header.cx .cx-gear.cx-roleic{width:28px;height:28px;color:#1a1a1a}
   <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 22s7-6.2 7-12a7 7 0 0 0-14 0c0 5.8 7 12 7 12z"/><circle cx="12" cy="10" r="2.5"/></symbol>
 </svg>
 <div id="bar"></div>
-<header class="cx"><button id="home" class="hide cx-btn l" type="button" aria-label="KITCHEN" title="KITCHEN"><svg class="cx-i" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-8 9 8M5 9.5V20h5v-6h4v6h5V9.5"/></svg></button><div class="cx-title"><svg class="cx-gear" viewBox="6 6 36 36" fill="none" stroke="#000" stroke-width="2.6" stroke-linejoin="round" aria-hidden="true"><path d="M24.00 11.00 L26.00 7.12 L29.88 8.05 L29.90 12.42 L33.19 14.81 L37.35 13.48 L39.44 16.88 L36.36 19.98 L37.00 24.00 L40.88 26.00 L39.95 29.88 L35.58 29.90 L33.19 33.19 L34.52 37.35 L31.12 39.44 L28.02 36.36 L24.00 37.00 L22.00 40.88 L18.12 39.95 L18.10 35.58 L14.81 33.19 L10.65 34.52 L8.56 31.12 L11.64 28.02 L11.00 24.00 L7.12 22.00 L8.05 18.12 L12.42 18.10 L14.81 14.81 L13.48 10.65 L16.88 8.56 L19.98 11.64 Z"/><circle cx="24" cy="24" r="5"/></svg><div class="cx-tt"><h1>CMCOOKING<span class="cx-role"></span></h1><small class="cx-sub" id="cxSub"></small></div></div><button id="out" class="hide cx-btn r" type="button" aria-label="EXIT" title="EXIT"><svg class="cx-i" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></header>
+<header class="cx"><button id="home" class="hide cx-btn l" type="button" aria-label="KITCHEN" title="KITCHEN"><svg class="cx-i" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-8 9 8M5 9.5V20h5v-6h4v6h5V9.5"/></svg></button><div class="cx-title"><svg class="cx-gear cx-logo" viewBox="0 0 100 100" aria-hidden="true"><rect width="100" height="100" rx="22" fill="#000"/><polygon points="80.28,43.36 87.68,45.09 87.68,54.91 80.28,56.64 78.40,62.42 83.37,68.18 77.60,76.12 70.59,73.17 65.68,76.74 66.31,84.32 56.97,87.35 53.04,80.85 46.96,80.85 43.03,87.35 33.69,84.32 34.32,76.74 29.41,73.17 22.40,76.12 16.63,68.18 21.60,62.42 19.72,56.64 12.32,54.91 12.32,45.09 19.72,43.36 21.60,37.58 16.63,31.82 22.40,23.88 29.41,26.83 34.32,23.26 33.69,15.68 43.03,12.65 46.96,19.15 53.04,19.15 56.97,12.65 66.31,15.68 65.68,23.26 70.59,26.83 77.60,23.88 83.37,31.82 78.40,37.58" fill="#fff"/><circle cx="50" cy="50" r="25" fill="#000"/><g fill="#F5B700"><circle cx="43.25" cy="49.00" r="6.75"/><circle cx="56.75" cy="49.00" r="6.75"/><circle cx="50.00" cy="44.50" r="8.25"/><rect x="40.25" y="49.00" width="19.50" height="10.50"/><rect x="40.25" y="61.00" width="19.50" height="3.75" rx="1.12"/></g></svg><div class="cx-tt"><h1>CMCOOKING<span class="cx-role"></span></h1><span class="cx-subrow"><b class="cx-tb">TEST</b><small class="cx-sub" id="cxSub"></small></span></div></div><button id="out" class="hide cx-btn r" type="button" aria-label="EXIT" title="EXIT"><svg class="cx-i" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></header>
 <main>
 <p id="msg" role="alert"></p>
 
 <section id="vLogin">
-  <div class="lg-head"><div class="cx-title" style="display:flex;align-items:center;gap:8px"><svg class="cx-gear lg-gear" viewBox="6 6 36 36" fill="none" stroke="#000" stroke-width="2.6" stroke-linejoin="round" aria-hidden="true"><path d="M24.00 11.00 L26.00 7.12 L29.88 8.05 L29.90 12.42 L33.19 14.81 L37.35 13.48 L39.44 16.88 L36.36 19.98 L37.00 24.00 L40.88 26.00 L39.95 29.88 L35.58 29.90 L33.19 33.19 L34.52 37.35 L31.12 39.44 L28.02 36.36 L24.00 37.00 L22.00 40.88 L18.12 39.95 L18.10 35.58 L14.81 33.19 L10.65 34.52 L8.56 31.12 L11.64 28.02 L11.00 24.00 L7.12 22.00 L8.05 18.12 L12.42 18.10 L14.81 14.81 L13.48 10.65 L16.88 8.56 L19.98 11.64 Z"/><circle cx="24" cy="24" r="5"/></svg><h1>CMCOOKING<span class="cx-role"></span></h1></div></div>
+  <div class="lg-head"><div class="cx-title" style="display:flex;align-items:center;gap:8px"><svg class="cx-gear lg-gear" viewBox="0 0 100 100" aria-hidden="true"><rect width="100" height="100" rx="22" fill="#000"/><polygon points="80.28,43.36 87.68,45.09 87.68,54.91 80.28,56.64 78.40,62.42 83.37,68.18 77.60,76.12 70.59,73.17 65.68,76.74 66.31,84.32 56.97,87.35 53.04,80.85 46.96,80.85 43.03,87.35 33.69,84.32 34.32,76.74 29.41,73.17 22.40,76.12 16.63,68.18 21.60,62.42 19.72,56.64 12.32,54.91 12.32,45.09 19.72,43.36 21.60,37.58 16.63,31.82 22.40,23.88 29.41,26.83 34.32,23.26 33.69,15.68 43.03,12.65 46.96,19.15 53.04,19.15 56.97,12.65 66.31,15.68 65.68,23.26 70.59,26.83 77.60,23.88 83.37,31.82 78.40,37.58" fill="#fff"/><circle cx="50" cy="50" r="25" fill="#000"/><g fill="#F5B700"><circle cx="43.25" cy="49.00" r="6.75"/><circle cx="56.75" cy="49.00" r="6.75"/><circle cx="50.00" cy="44.50" r="8.25"/><rect x="40.25" y="49.00" width="19.50" height="10.50"/><rect x="40.25" y="61.00" width="19.50" height="3.75" rx="1.12"/></g></svg><h1>CMCOOKING<span class="cx-role"></span></h1></div></div>
   <div class="lg-main">
     <div class="lg-logo" aria-label="CMCS">
-      <svg viewBox="6 6 36 36" fill="none" stroke="#fff" stroke-width="2.4" stroke-linejoin="round" aria-hidden="true"><path d="M24.00 11.00 L26.00 7.12 L29.88 8.05 L29.90 12.42 L33.19 14.81 L37.35 13.48 L39.44 16.88 L36.36 19.98 L37.00 24.00 L40.88 26.00 L39.95 29.88 L35.58 29.90 L33.19 33.19 L34.52 37.35 L31.12 39.44 L28.02 36.36 L24.00 37.00 L22.00 40.88 L18.12 39.95 L18.10 35.58 L14.81 33.19 L10.65 34.52 L8.56 31.12 L11.64 28.02 L11.00 24.00 L7.12 22.00 L8.05 18.12 L12.42 18.10 L14.81 14.81 L13.48 10.65 L16.88 8.56 L19.98 11.64 Z"/><circle cx="24" cy="24" r="5"/></svg>
+      <svg viewBox="8 8 84 84" aria-hidden="true"><polygon points="80.28,43.36 87.68,45.09 87.68,54.91 80.28,56.64 78.40,62.42 83.37,68.18 77.60,76.12 70.59,73.17 65.68,76.74 66.31,84.32 56.97,87.35 53.04,80.85 46.96,80.85 43.03,87.35 33.69,84.32 34.32,76.74 29.41,73.17 22.40,76.12 16.63,68.18 21.60,62.42 19.72,56.64 12.32,54.91 12.32,45.09 19.72,43.36 21.60,37.58 16.63,31.82 22.40,23.88 29.41,26.83 34.32,23.26 33.69,15.68 43.03,12.65 46.96,19.15 53.04,19.15 56.97,12.65 66.31,15.68 65.68,23.26 70.59,26.83 77.60,23.88 83.37,31.82 78.40,37.58" fill="#fff"/><circle cx="50" cy="50" r="25" fill="#000"/><g fill="#F5B700"><circle cx="43.25" cy="49.00" r="6.75"/><circle cx="56.75" cy="49.00" r="6.75"/><circle cx="50.00" cy="44.50" r="8.25"/><rect x="40.25" y="49.00" width="19.50" height="10.50"/><rect x="40.25" y="61.00" width="19.50" height="3.75" rx="1.12"/></g></svg><i class="lg-tb">TEST</i>
       <span>CMCS</span>
     </div>
     <p class="lg-label">ยินดีต้อนรับยอดนักปรุง</p>
@@ -684,6 +713,7 @@ header.cx .cx-gear.cx-roleic{width:28px;height:28px;color:#1a1a1a}
 </section>
 
 <section id="vBar" class="hide">
+  <button id="btScan" type="button" class="scan-btn"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M7 8v8M10 8v8M13 8v8M16 8v8"/></svg>สแกน QR / Barcode</button>
   <div class="card">
     <label for="bt">SN</label>
     <input id="bt" maxlength="80" autocomplete="off" autocapitalize="characters" autocorrect="off" spellcheck="false" placeholder="เช่น FHTT0A1B2C3D">
@@ -691,6 +721,7 @@ header.cx .cx-gear.cx-roleic{width:28px;height:28px;color:#1a1a1a}
     <p class="hint" id="btMsg"></p>
   </div>
   <div class="two bt-acts"><button id="btBig" class="ghost" disabled><svg class="ic"><use href="#i-zoom"/></svg>Zoom</button><button id="btDl" disabled><svg class="ic"><use href="#i-dl"/></svg>Save to PNG</button></div>
+  <button id="btFind" type="button" class="ghost hide">ค้นหา SN นี้ใน CM:MENU ›</button>
   <div class="fs bt-list"><h3><svg class="ic"><use href="#i-bar"/></svg>SN ในคลัง <span id="btCnt"></span></h3><div id="btList"><p class="hint">กำลังโหลด…</p></div></div>
 </section>
 
@@ -765,6 +796,13 @@ header.cx .cx-gear.cx-roleic{width:28px;height:28px;color:#1a1a1a}
   <div class="fg"><h4>เรียง</h4><div class="rp-chips2" id="flSort"></div></div>
   <div class="fl-btns"><button type="button" class="gh" id="flClr">ล้าง</button><button type="button" class="go" id="flGo">แสดงผล</button></div>
 </div></div>
+
+<div id="scanOv" class="hide" role="dialog" aria-modal="true" aria-label="สแกน QR / Barcode">
+  <video id="scanV" playsinline muted autoplay></video>
+  <div class="scan-frame"><i></i></div>
+  <p id="scanMsg">เล็งกล้องไปที่ QR หรือ Barcode</p>
+  <div class="scan-btns"><button type="button" id="scanTorch" class="hide">ไฟฉาย</button><button type="button" id="scanX">ปิด</button></div>
+</div>
 
 <section id="vList" class="hide">
   <div class="sticky">
@@ -1074,7 +1112,7 @@ const ROLE_IC = {"cook": "<g fill=\"none\" stroke=\"#9aa3ad\" stroke-width=\"2.6
 function cxBrand(u){
   const role = u ? (u.role === 'admin' ? 'chef' : 'cook') : '';
   document.querySelectorAll('header.cx .cx-role').forEach(el => { el.innerHTML = role ? role.toUpperCase() + ROLE_BADGE[role] : ''; });
-  document.querySelectorAll('header.cx .cx-gear').forEach(g => {
+  document.querySelectorAll('header.cx .cx-gear:not(.cx-logo)').forEach(g => {
     if (!g.dataset.gear) { g.dataset.gear = g.innerHTML; g.dataset.vb = g.getAttribute('viewBox'); }
     if (role) { g.setAttribute('viewBox', '0 0 36 36'); g.innerHTML = ROLE_IC[role]; g.classList.add('cx-roleic'); }
     else { g.setAttribute('viewBox', g.dataset.vb); g.innerHTML = g.dataset.gear; g.classList.remove('cx-roleic'); }
@@ -1133,7 +1171,7 @@ $('go').onclick = () => busy($('go'), '…', async () => {
   const from = fromIc ? fromIc.getBoundingClientRect() : null, role = me.role === 'admin' ? 'chef' : 'cook';
   if (wantAdmin) { await cxFly(from, document.querySelector('#vLogin .lg-gear'), role); location.href = 'admin.html'; return; }
   goHome(); loadPP(true);
-  cxFly(from, document.querySelector('header.cx .cx-gear'), role);
+  cxFly(from, document.querySelector('header.cx .cx-role'), role);
 });
 $('p').addEventListener('keydown', e => { if (e.key === 'Enter') $('go').click(); });
 
@@ -1162,7 +1200,7 @@ function openBar(sn, replace){
   say();
   if (replace) { NAV[navI] = 'vBar'; history.replaceState({cm: navI}, '', location.pathname + location.search); show('vBar'); }   // เปิดจากลิงก์: Back กลับหน้าที่กดมา
   else view('vBar');
-  $('bt').value = String(sn || '').trim(); updBar(); drawBtList(); window.scrollTo(0, 0);
+  $('bt').value = String(sn || '').trim(); updBar(); btFindShow(); drawBtList(); window.scrollTo(0, 0);
 }
 /* รายการ SN ในคลัง: แตะเพื่อสร้างบาร์โค้ดทันที */
 function drawBtList(){
@@ -1176,7 +1214,7 @@ function drawBtList(){
   };
   paint(); loadStock(true).then(paint);
 }
-$('btList').onclick = e => { const b = e.target.closest('[data-sn]'); if (!b) return; $('bt').value = b.dataset.sn; updBar(); drawBtList(); window.scrollTo({top: 0, behavior: 'smooth'}); };
+$('btList').onclick = e => { const b = e.target.closest('[data-sn]'); if (!b) return; $('bt').value = b.dataset.sn; updBar(); btFindShow(); drawBtList(); window.scrollTo({top: 0, behavior: 'smooth'}); };
 $('toolBar').onclick = () => { say(); view('vBar'); updBar(); drawBtList(); };
 
 /* ---------- เครื่องมือ Barcode ---------- */
@@ -1191,7 +1229,7 @@ function updBar(){
   btMsg(''); $('btPrev').innerHTML = barcodeSvg(t); curText = t; $('btBig').disabled = false;
   pngBlob(t, b => { if (my === btSeq && b) { curBlob = b; $('btDl').disabled = false; } });
 }
-$('bt').oninput = () => { updBar(); $('btList').querySelectorAll('[data-sn]').forEach(b => b.classList.toggle('on', b.dataset.sn.toLowerCase() === $('bt').value.trim().toLowerCase())); };
+$('bt').oninput = () => { updBar(); btFindShow(); $('btList').querySelectorAll('[data-sn]').forEach(b => b.classList.toggle('on', b.dataset.sn.toLowerCase() === $('bt').value.trim().toLowerCase())); };
 $('btPrev').onclick = () => { if (curText) showBig(curText); };
 $('btBig').onclick = () => { if (curText) showBig(curText); };
 $('btDl').onclick = () => {
@@ -2269,6 +2307,86 @@ $('flTxt').onclick = () => {
   if (flTotal > s.list.length) L.push('', '(แสดง ' + s.list.length + ' จาก ' + flTotal + ' งาน)');
   rpShowText('ส่งออกผลค้นหา (Text)', L.join('\n'));
 };
+
+
+
+/* ---------- สแกน QR / Barcode (กล้องหลัง) ---------- */
+const SCAN_FMT = ['qr_code', 'code_128', 'code_39', 'code_93', 'ean_13', 'ean_8', 'upc_a', 'upc_e', 'itf', 'codabar', 'data_matrix', 'pdf417', 'aztec'];
+let scanStream = null, scanRun = 0, scanDet = null, scanTorchOn = false;
+async function scanMakeDetector(){
+  if ('BarcodeDetector' in window) {
+    try {
+      const sup = await BarcodeDetector.getSupportedFormats(), f = SCAN_FMT.filter(x => sup.includes(x));
+      if (f.length) { const d = new BarcodeDetector({formats: f}); return async v => { const r = await d.detect(v); return r && r.length ? r[0].rawValue : ''; }; }
+    } catch (e) {}
+  }
+  if (!window.jsQR || !window.Quagga) {
+    try { await new Promise((ok, bad) => { const s = document.createElement('script'); s.src = 'scan-lib.js'; s.onload = ok; s.onerror = bad; document.head.appendChild(s); }); }
+    catch (e) { return null; }
+    if (!window.jsQR || !window.Quagga) return null;
+  }
+  const cv = document.createElement('canvas'), cx = cv.getContext('2d', {willReadFrequently: true});
+  let k = 0;
+  return async v => {
+    const w = v.videoWidth, h = v.videoHeight; if (!w || !h) return '';
+    const s = Math.min(1, 960 / Math.max(w, h)); cv.width = Math.round(w * s); cv.height = Math.round(h * s);
+    cx.drawImage(v, 0, 0, cv.width, cv.height);
+    const img = cx.getImageData(0, 0, cv.width, cv.height);
+    const q = window.jsQR(img.data, cv.width, cv.height, {inversionAttempts: 'attemptBoth'});
+    if (q && q.data) return q.data;
+    if ((k++) % 2) return '';
+    return await new Promise(res => {
+      try {
+        window.Quagga.decodeSingle({src: cv.toDataURL('image/jpeg', .85), numOfWorkers: 0, locate: true, inputStream: {size: Math.max(cv.width, cv.height)},
+          decoder: {readers: ['code_128_reader', 'ean_reader', 'ean_8_reader', 'code_39_reader', 'upc_reader', 'upc_e_reader', 'i2of5_reader', 'codabar_reader']}},
+          r => res(r && r.codeResult && r.codeResult.code ? r.codeResult.code : ''));
+      } catch (e) { res(''); }
+    });
+  };
+}
+async function scanOpen(){
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return toast('เบราว์เซอร์นี้เปิดกล้องไม่ได้', true);
+  const my = ++scanRun;
+  $('scanOv').classList.remove('hide'); $('scanMsg').textContent = 'กำลังเปิดกล้อง…'; $('scanTorch').classList.add('hide'); scanTorchOn = false; $('scanTorch').classList.remove('on');
+  try { scanStream = await navigator.mediaDevices.getUserMedia({video: {facingMode: {ideal: 'environment'}, width: {ideal: 1280}, height: {ideal: 720}}, audio: false}); }
+  catch (e) { scanClose(); return toast(e && e.name === 'NotAllowedError' ? 'ไม่ได้รับอนุญาตให้ใช้กล้อง เปิดสิทธิ์กล้องให้เว็บนี้ในการตั้งค่าเบราว์เซอร์' : 'เปิดกล้องไม่ได้', true); }
+  if (my !== scanRun) { scanStream.getTracks().forEach(t => t.stop()); scanStream = null; return; }
+  const v = $('scanV'); v.srcObject = scanStream; try { await v.play(); } catch (e) {}
+  try { const tr = scanStream.getVideoTracks()[0], cap = tr && tr.getCapabilities ? tr.getCapabilities() : {}; $('scanTorch').classList.toggle('hide', !cap.torch); } catch (e) {}
+  if (!scanDet) { $('scanMsg').textContent = 'กำลังเตรียมตัวอ่าน…'; scanDet = await scanMakeDetector(); }
+  if (my !== scanRun) return;
+  if (!scanDet) { scanClose(); return toast('โหลดตัวอ่านไม่ได้ ตรวจสอบสัญญาณแล้วลองใหม่', true); }
+  $('scanMsg').textContent = 'เล็งกล้องไปที่ QR หรือ Barcode';
+  while (my === scanRun) {
+    let val = '';
+    try { if (v.readyState >= 2) val = await scanDet(v); } catch (e) {}
+    if (my !== scanRun) return;
+    if (val && String(val).trim()) return scanDone(String(val).trim());
+    await new Promise(r => setTimeout(r, 150));
+  }
+}
+function scanClose(){
+  scanRun++;
+  if (scanStream) { scanStream.getTracks().forEach(t => t.stop()); scanStream = null; }
+  $('scanV').srcObject = null; $('scanOv').classList.add('hide');
+}
+function scanDone(val){
+  scanClose(); buzz(false);
+  $('bt').value = val.slice(0, 80); $('bt').oninput();
+  window.scrollTo({top: 0, behavior: 'smooth'});
+  toast(val.length > 80 ? 'สแกนแล้ว (ตัดเหลือ 80 ตัวอักษร)' : 'สแกนแล้ว ✓');
+}
+$('btScan').onclick = () => scanOpen();
+$('scanX').onclick = () => scanClose();
+$('scanTorch').onclick = async () => {
+  if (!scanStream) return;
+  try { scanTorchOn = !scanTorchOn; await scanStream.getVideoTracks()[0].applyConstraints({advanced: [{torch: scanTorchOn}]}); $('scanTorch').classList.toggle('on', scanTorchOn); } catch (e) { toast('เปิดไฟฉายไม่ได้', true); }
+};
+window.addEventListener('popstate', () => { if (scanStream || !$('scanOv').classList.contains('hide')) scanClose(); });
+document.addEventListener('visibilitychange', () => { if (document.hidden && scanStream) scanClose(); });
+/* ค้นหาใน CM:MENU จาก SN ที่สแกน/พิมพ์ */
+function btFindShow(){ const t = $('bt').value.trim(); $('btFind').classList.toggle('hide', !(t.length >= 2)); }
+$('btFind').onclick = () => { const t = $('bt').value.trim(); if (!t) return; FL = FL0(); flChips(); $('q').value = t; hist = false; load(); };
 
 
 /* Line Type: ปุ่มเพิ่ม → แสดงช่อง Drum No. (เก็บรูปแบบเดิม) */
